@@ -570,7 +570,7 @@
                     <div class="tab" onclick="showTab('matieres')">🧪 Matières Premières</div>
                     <div class="tab" onclick="showTab('fabrication')">⚙️ Fabrication</div>
                     <div class="tab" onclick="showTab('nomenclature')">📋 Nomenclature</div>
-                    <div class="tab" onclick="showTab('couts')">💰 Coûts</div>
+                    <div class="tab" onclick="showTab('couts')">💰 Analyse du coût de revient</div>
                     <div class="tab admin-only" id="admin-tab" onclick="showTab('admin')">🔧 Administration</div>
                 </div>
                 
@@ -2356,7 +2356,7 @@ VI Conseil - Test Template
             const coutTotal = coutMatieres + coutMainOeuvre + coutFabrication;
             const prixVente = produitInfo.prix;
             const margeBrute = prixVente - coutTotal;
-            const tauxMarge = coutTotal > 0 ? (margeBrute / coutTotal) * 100 : 0;
+            const tauxMarge = prixVente > 0 ? (margeBrute / prixVente) * 100 : 0;
             const coefficient = coutTotal > 0 ? prixVente / coutTotal : 0;
 
             document.getElementById('cout_matieres').textContent = coutMatieres.toFixed(2) + ' €';
@@ -2544,7 +2544,7 @@ VI Conseil - Test Template
                 const coutFabrication = etapesFabrication.reduce((total, etape) => total + etape.coutMachine, 0);
                 const coutTotal = coutMatieres + coutMainOeuvre + coutFabrication;
                 const margeBrute = produitInfo.prix - coutTotal;
-                const tauxMarge = coutTotal > 0 ? (margeBrute / coutTotal) * 100 : 0;
+                const tauxMarge = prixVente > 0 ? (margeBrute / prixVente) * 100 : 0;
                 
                 pdf.setFillColor(102, 126, 234);
                 pdf.rect(margin, currentY, pageWidth - 2*margin, 8, 'F');
