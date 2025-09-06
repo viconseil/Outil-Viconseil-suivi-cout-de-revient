@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    DEPLOIEMENT OUTIL VI CONSEIL
+echo    MISE A JOUR OUTIL VI CONSEIL
 echo ========================================
 echo.
 
@@ -29,7 +29,7 @@ if "%message%"=="" (
 )
 
 echo.
-echo 🚀 Déploiement en cours...
+echo 🚀 Mise à jour en cours...
 echo Message: "%message%"
 echo.
 
@@ -58,7 +58,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo ✅ Déploiement réussi !
+echo ✅ Mise à jour réussie !
 echo 🌐 Votre outil sera mis à jour sur Vercel dans quelques minutes
 echo.
 pause

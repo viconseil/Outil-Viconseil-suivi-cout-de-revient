@@ -3,9 +3,9 @@
 ## 🚀 Déploiement Rapide
 
 ### Windows
-Double-cliquez sur `deploy.bat` ou dans le terminal :
+Double-cliquez sur `update-outil.bat` ou dans le terminal :
 ```cmd
-deploy.bat
+update-outil.bat
 ```
 
 ### Linux/Mac
