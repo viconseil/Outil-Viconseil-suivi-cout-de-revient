@@ -365,6 +365,103 @@
             font-size: 2.5em;
             font-weight: bold;
         }
+
+        /* Nouveaux indicateurs avec graphiques */
+        .cost-indicator {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .cost-indicator:hover {
+            transform: translateY(-5px);
+        }
+
+        .indicator-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .indicator-header h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .amount-large {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .percentage {
+            font-size: 1.4em;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            padding: 15px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-container-large {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .indicator-details {
+            padding: 15px 20px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .indicator-details span {
+            font-weight: 500;
+        }
+
+        .indicator-details span span {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .historique-stats {
+            padding: 15px 20px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-small {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
         
         .level-indicator {
             display: inline-block;
@@ -901,49 +998,60 @@
                 <!-- Onglet Coûts -->
                 <div id="couts" class="tab-content">
                     <div class="section">
-                        <h3>💰 Analyse des Coûts de Revient</h3>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                                <h3>Matières Premières</h3>
-                                <div class="amount" id="cout_matieres">0.00 €</div>
-                            </div>
-                            
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);">
-                                <h3>Main d'Œuvre</h3>
-                                <div class="amount" id="cout_main_oeuvre">0.00 €</div>
-                            </div>
-                            
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
-                                <h3>Frais de Fabrication</h3>
-                                <div class="amount" id="cout_fabrication">0.00 €</div>
-                            </div>
-                            
-                            <div class="cost-summary">
-                                <h3>COÛT DE REVIENT TOTAL</h3>
-                                <div class="amount" id="cout_total">0.00 €</div>
-                            </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3>💰 Analyse des Coûts de Revient</h3>
+                            <button class="btn" onclick="actualiserCouts()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 10px 20px;">
+                                🔄 Actualiser les calculs
+                            </button>
                         </div>
                         
-                        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);">
-                                <h3>Prix de Vente</h3>
-                                <div class="amount" id="prix_vente_display">99.90 €</div>
+                        <!-- Indicateurs Principaux avec Mini-Graphiques -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+                            <!-- Coût de Revient Total -->
+                            <div class="cost-indicator">
+                                <div class="indicator-header">
+                                    <h3>💰 COÛT DE REVIENT TOTAL</h3>
+                                    <div class="amount-large" id="cout_total">0.00 €</div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart_cout_repartition" width="200" height="120"></canvas>
+                                </div>
+                                <div class="indicator-details">
+                                    <span>Matières: <span id="cout_matieres">0.00 €</span></span>
+                                    <span>MO: <span id="cout_main_oeuvre">0.00 €</span></span>
+                                    <span>Fabrication: <span id="cout_fabrication">0.00 €</span></span>
+                                </div>
                             </div>
-                            
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
-                                <h3>Marge Brute</h3>
-                                <div class="amount" id="marge_brute">0.00 €</div>
+
+                            <!-- Marge Brute -->
+                            <div class="cost-indicator">
+                                <div class="indicator-header">
+                                    <h3>📈 MARGE BRUTE</h3>
+                                    <div class="amount-large" id="marge_brute">0.00 €</div>
+                                    <div class="percentage" id="taux_marge">0.0%</div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart_marge_ca" width="200" height="120"></canvas>
+                                </div>
+                                <div class="indicator-details">
+                                    <span>Prix Vente: <span id="prix_vente_display">99.90 €</span></span>
+                                    <span>Coefficient: <span id="coefficient">0.0</span></span>
+                                </div>
                             </div>
-                            
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);">
-                                <h3>Taux de Marge</h3>
-                                <div class="amount" id="taux_marge">0.0%</div>
-                            </div>
-                            
-                            <div class="cost-summary" style="background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);">
-                                <h3>Coefficient Multiplicateur</h3>
-                                <div class="amount" id="coefficient">0.0</div>
+
+                            <!-- Évolution des Marges -->
+                            <div class="cost-indicator" style="grid-column: span 2;">
+                                <div class="indicator-header">
+                                    <h3>📊 HISTORIQUE DES MARGES</h3>
+                                    <button class="btn-small" onclick="effacerHistorique()">🗑️ Effacer</button>
+                                </div>
+                                <div class="chart-container-large">
+                                    <canvas id="chart_historique_marge" width="600" height="200"></canvas>
+                                </div>
+                                <div class="historique-stats">
+                                    <span>Dernière mise à jour: <span id="derniere_maj">-</span></span>
+                                    <span>Nombre d'analyses: <span id="nb_analyses">0</span></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2368,6 +2476,16 @@ VI Conseil - Test Template
             document.getElementById('coefficient').textContent = coefficient.toFixed(2);
 
             afficherRepartition(coutMatieres, coutMainOeuvre, coutFabrication, coutTotal);
+            
+            // Mettre à jour les graphiques
+            creerGraphiqueRepartition(coutMatieres, coutMainOeuvre, coutFabrication);
+            creerGraphiqueMargeCA(margeBrute, coutTotal, prixVente);
+            
+            // Ajouter à l'historique
+            ajouterAHistorique(margeBrute, tauxMarge, coutTotal, prixVente);
+            
+            // Mettre à jour le prix de vente affiché
+            document.getElementById('prix_vente_display').textContent = prixVente.toFixed(2) + ' €';
         }
 
         function afficherRepartition(coutMatieres, coutMainOeuvre, coutFabrication, coutTotal) {
@@ -2402,6 +2520,225 @@ VI Conseil - Test Template
                     <td>${poste.detail}</td>
                 `;
             });
+        }
+
+        // Variables globales pour l'historique des marges
+        let historiqueMarges = JSON.parse(localStorage.getItem('historique_marges') || '[]');
+
+        // Fonction pour actualiser les calculs
+        function actualiserCouts() {
+            showSaveIndicator('saving', '🔄 Recalcul en cours...');
+            calculerCouts();
+            showSaveIndicator('success', '✅ Calculs actualisés');
+        }
+
+        // Fonction pour créer le graphique de répartition des coûts
+        function creerGraphiqueRepartition(coutMatieres, coutMainOeuvre, coutFabrication) {
+            const canvas = document.getElementById('chart_cout_repartition');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Détruire le graphique existant s'il y en a un
+            if (window.chartRepartition) {
+                window.chartRepartition.destroy();
+            }
+
+            const data = {
+                labels: ['Matières', 'Main d\'œuvre', 'Fabrication'],
+                datasets: [{
+                    data: [coutMatieres, coutMainOeuvre, coutFabrication],
+                    backgroundColor: [
+                        '#3498db',
+                        '#f39c12', 
+                        '#9b59b6'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            };
+
+            window.chartRepartition = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                fontSize: 10,
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fonction pour créer le graphique marge/CA
+        function creerGraphiqueMargeCA(margeBrute, coutTotal, prixVente) {
+            const canvas = document.getElementById('chart_marge_ca');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Détruire le graphique existant
+            if (window.chartMargeCA) {
+                window.chartMargeCA.destroy();
+            }
+
+            const data = {
+                labels: ['Marge Brute', 'Coût de Revient'],
+                datasets: [{
+                    data: [margeBrute, coutTotal],
+                    backgroundColor: [
+                        '#27ae60',
+                        '#e74c3c'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            };
+
+            window.chartMargeCA = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                fontSize: 10,
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fonction pour ajouter une entrée à l'historique
+        function ajouterAHistorique(margeBrute, tauxMarge, coutTotal, prixVente) {
+            const maintenant = new Date();
+            const entree = {
+                date: maintenant.toISOString(),
+                dateAffichage: maintenant.toLocaleString('fr-FR'),
+                margeBrute: margeBrute,
+                tauxMarge: tauxMarge,
+                coutTotal: coutTotal,
+                prixVente: prixVente
+            };
+
+            historiqueMarges.push(entree);
+            
+            // Garder seulement les 50 dernières entrées
+            if (historiqueMarges.length > 50) {
+                historiqueMarges = historiqueMarges.slice(-50);
+            }
+
+            // Sauvegarder dans localStorage
+            localStorage.setItem('historique_marges', JSON.stringify(historiqueMarges));
+
+            // Mettre à jour l'affichage
+            mettreAJourHistorique();
+        }
+
+        // Fonction pour mettre à jour l'affichage de l'historique
+        function mettreAJourHistorique() {
+            const canvas = document.getElementById('chart_historique_marge');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            
+            // Détruire le graphique existant
+            if (window.chartHistorique) {
+                window.chartHistorique.destroy();
+            }
+
+            // Prendre les 20 dernières entrées
+            const dernieresEntrees = historiqueMarges.slice(-20);
+            
+            const labels = dernieresEntrees.map(entree => {
+                const date = new Date(entree.date);
+                return date.toLocaleDateString('fr-FR', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            });
+            
+            const donneesMarges = dernieresEntrees.map(entree => entree.tauxMarge);
+            const donneesPrix = dernieresEntrees.map(entree => entree.prixVente);
+            
+            window.chartHistorique = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Taux de Marge (%)',
+                        data: donneesMarges,
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Prix de Vente (€)',
+                        data: donneesPrix,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Taux de Marge (%)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Prix de Vente (€)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+
+            // Mettre à jour les statistiques
+            document.getElementById('derniere_maj').textContent = historiqueMarges.length > 0 ? 
+                new Date(historiqueMarges[historiqueMarges.length - 1].date).toLocaleString('fr-FR') : 
+                '-';
+            document.getElementById('nb_analyses').textContent = historiqueMarges.length;
+        }
+
+        // Fonction pour effacer l'historique
+        function effacerHistorique() {
+            if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique des marges ?')) {
+                historiqueMarges = [];
+                localStorage.removeItem('historique_marges');
+                mettreAJourHistorique();
+                showSaveIndicator('success', '🗑️ Historique effacé');
+            }
         }
 
         // Fonctions d'export/import (simplifiées pour sécurité)
@@ -2658,6 +2995,9 @@ VI Conseil - Test Template
             
             updateProduit();
             calculerCouts();
+            
+            // Charger l'historique des marges au démarrage
+            mettreAJourHistorique();
         });
     </script>
 </body>
