@@ -819,7 +819,8 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button class="btn" onclick="ajouterMatiere()">➕ Ajouter la matière première</button>
+                            <button id="btn_ajouter_matiere" class="btn" onclick="ajouterMatiere()">➕ Ajouter la matière première</button>
+                            <button id="btn_annuler_modif_mp" class="btn" onclick="annulerModificationMatiere()" style="display: none; background: #6c757d; margin-left: 10px;">❌ Annuler</button>
                         </div>
                     </div>
                     
@@ -897,7 +898,8 @@
                             <textarea id="etape_description" rows="3" placeholder="Décrivez précisément cette étape de fabrication..."></textarea>
                         </div>
                         <div class="form-group">
-                            <button class="btn" onclick="ajouterEtape()">➕ Ajouter l'étape</button>
+                            <button id="btn_ajouter_etape" class="btn" onclick="ajouterEtape()">➕ Ajouter l'étape</button>
+                            <button id="btn_annuler_modif" class="btn" onclick="annulerModificationEtape()" style="display: none; background: #6c757d; margin-left: 10px;">❌ Annuler</button>
                         </div>
                     </div>
                     
@@ -2192,7 +2194,10 @@ VI Conseil - Test Template
             matieresPremiere.forEach(matiere => {
                 const row = tbody.insertRow();
                 const actionsHtml = currentUser.role === 'admin' ? 
-                    `<td><button class="btn btn-danger" onclick="supprimerMatiere(${matiere.id})">🗑️</button></td>` : '';
+                    `<td>
+                        <button class="btn btn-primary" onclick="modifierMatiere(${matiere.id})" style="margin-right: 5px;">✏️</button>
+                        <button class="btn btn-danger" onclick="supprimerMatiere(${matiere.id})">🗑️</button>
+                    </td>` : '';
                 
                 row.innerHTML = `
                     <td><strong>${matiere.reference || ''}</strong></td>
@@ -2267,6 +2272,120 @@ VI Conseil - Test Template
             }
         }
 
+        // Variable pour stocker l'ID de la matière première en cours de modification
+        let matiereEnModification = null;
+
+        function modifierMatiere(id) {
+            if (currentUser.role !== 'admin') return;
+            
+            const matiere = matieresPremiere.find(m => m.id === id);
+            if (!matiere) return;
+
+            // Remplir le formulaire avec les données existantes
+            document.getElementById('matiere_nom').value = matiere.nom;
+            document.getElementById('matiere_prix').value = matiere.prix;
+            document.getElementById('matiere_unite').value = matiere.unite;
+            document.getElementById('matiere_stock').value = matiere.stock;
+            document.getElementById('matiere_seuil').value = matiere.seuil;
+            document.getElementById('matiere_categorie').value = matiere.categorie;
+            document.getElementById('matiere_famille').value = matiere.famille;
+            document.getElementById('matiere_origine').value = matiere.origine;
+            document.getElementById('matiere_fournisseur').value = matiere.fournisseur;
+            document.getElementById('matiere_centre_cout').value = matiere.centreCout;
+            document.getElementById('matiere_reference').value = matiere.reference || '';
+            document.getElementById('matiere_delai').value = matiere.delai || '';
+
+            // Passer en mode modification
+            matiereEnModification = id;
+            
+            // Modifier l'interface
+            document.getElementById('btn_ajouter_matiere').textContent = '✏️ Modifier la matière première';
+            document.getElementById('btn_ajouter_matiere').onclick = function() { sauvegarderModificationMatiere(); };
+            document.getElementById('btn_annuler_modif_mp').style.display = 'inline-block';
+
+            // Faire défiler vers le formulaire
+            document.getElementById('matiere_nom').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            showSaveIndicator('saving', '✏️ Mode modification activé');
+        }
+
+        function sauvegarderModificationMatiere() {
+            if (currentUser.role !== 'admin' || !matiereEnModification) return;
+
+            const nom = document.getElementById('matiere_nom').value;
+            const prix = parseFloat(document.getElementById('matiere_prix').value);
+            const unite = document.getElementById('matiere_unite').value;
+            const stock = parseFloat(document.getElementById('matiere_stock').value);
+            const seuil = parseFloat(document.getElementById('matiere_seuil').value);
+            const categorie = document.getElementById('matiere_categorie').value;
+            const famille = document.getElementById('matiere_famille').value;
+            const origine = document.getElementById('matiere_origine').value;
+            const fournisseur = document.getElementById('matiere_fournisseur').value;
+            const centreCout = document.getElementById('matiere_centre_cout').value;
+            const reference = document.getElementById('matiere_reference').value;
+            const delai = parseInt(document.getElementById('matiere_delai').value) || 0;
+
+            if (!nom || !prix || !unite || !fournisseur) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+
+            // Trouver et modifier la matière première
+            const matiereIndex = matieresPremiere.findIndex(m => m.id === matiereEnModification);
+            if (matiereIndex !== -1) {
+                matieresPremiere[matiereIndex] = {
+                    id: matiereEnModification,
+                    nom: nom,
+                    prix: prix,
+                    unite: unite,
+                    stock: stock,
+                    seuil: seuil,
+                    categorie: categorie,
+                    famille: famille,
+                    origine: origine,
+                    fournisseur: fournisseur,
+                    centreCout: centreCout,
+                    reference: reference,
+                    delai: delai
+                };
+
+                afficherMatieres();
+                updateMatieresSelect();
+                calculerCouts(); // Recalculer les coûts car le prix peut avoir changé
+                autoSave();
+
+                showSaveIndicator('success', '✅ Matière première modifiée avec succès');
+            }
+
+            // Sortir du mode modification
+            annulerModificationMatiere();
+        }
+
+        function annulerModificationMatiere() {
+            matiereEnModification = null;
+
+            // Vider le formulaire
+            document.getElementById('matiere_nom').value = '';
+            document.getElementById('matiere_prix').value = '';
+            document.getElementById('matiere_unite').value = 'kg';
+            document.getElementById('matiere_stock').value = '';
+            document.getElementById('matiere_seuil').value = '';
+            document.getElementById('matiere_categorie').value = 'ingredient';
+            document.getElementById('matiere_famille').value = 'principal';
+            document.getElementById('matiere_origine').value = 'france';
+            document.getElementById('matiere_fournisseur').value = '';
+            document.getElementById('matiere_centre_cout').value = 'production';
+            document.getElementById('matiere_reference').value = '';
+            document.getElementById('matiere_delai').value = '';
+
+            // Remettre l'interface normale
+            document.getElementById('btn_ajouter_matiere').textContent = '➕ Ajouter la matière première';
+            document.getElementById('btn_ajouter_matiere').onclick = function() { ajouterMatiere(); };
+            document.getElementById('btn_annuler_modif_mp').style.display = 'none';
+
+            showSaveIndicator('success', '❌ Modification annulée');
+        }
+
         function ajouterEtape() {
             if (currentUser.role !== 'admin') return;
             
@@ -2319,7 +2438,10 @@ VI Conseil - Test Template
                 const row = tbody.insertRow();
                 const coutMOTotal = (etape.duree / 60) * etape.coutMO;
                 const actionsHtml = currentUser.role === 'admin' ? 
-                    `<td><button class="btn btn-danger" onclick="supprimerEtape(${etape.id})">🗑️</button></td>` : '';
+                    `<td>
+                        <button class="btn btn-primary" onclick="modifierEtape(${etape.id})" style="margin-right: 5px;">✏️</button>
+                        <button class="btn btn-danger" onclick="supprimerEtape(${etape.id})">🗑️</button>
+                    </td>` : '';
                 
                 row.innerHTML = `
                     <td>${etape.ordre}</td>
@@ -2355,6 +2477,101 @@ VI Conseil - Test Template
                 calculerCouts();
                 autoSave(); // Sauvegarde automatique
             }
+        }
+
+        // Variable pour stocker l'ID de l'étape en cours de modification
+        let etapeEnModification = null;
+
+        function modifierEtape(id) {
+            if (currentUser.role !== 'admin') return;
+            
+            const etape = etapesFabrication.find(e => e.id === id);
+            if (!etape) return;
+
+            // Remplir le formulaire avec les données existantes
+            document.getElementById('etape_nom').value = etape.nom;
+            document.getElementById('etape_duree').value = etape.duree;
+            document.getElementById('etape_cout_mo').value = etape.coutMO;
+            document.getElementById('etape_cout_machine').value = etape.coutMachine;
+            document.getElementById('etape_type').value = etape.type;
+            document.getElementById('etape_ordre').value = etape.ordre;
+            document.getElementById('etape_description').value = etape.description;
+
+            // Passer en mode modification
+            etapeEnModification = id;
+            
+            // Modifier l'interface
+            document.getElementById('btn_ajouter_etape').textContent = '✏️ Modifier l\'étape';
+            document.getElementById('btn_ajouter_etape').onclick = function() { sauvegarderModificationEtape(); };
+            document.getElementById('btn_annuler_modif').style.display = 'inline-block';
+
+            // Faire défiler vers le formulaire
+            document.getElementById('etape_nom').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            showSaveIndicator('saving', '✏️ Mode modification activé');
+        }
+
+        function sauvegarderModificationEtape() {
+            if (currentUser.role !== 'admin' || !etapeEnModification) return;
+
+            const nom = document.getElementById('etape_nom').value;
+            const duree = parseFloat(document.getElementById('etape_duree').value);
+            const coutMO = parseFloat(document.getElementById('etape_cout_mo').value);
+            const coutMachine = parseFloat(document.getElementById('etape_cout_machine').value) || 0;
+            const type = document.getElementById('etape_type').value;
+            const ordre = parseInt(document.getElementById('etape_ordre').value) || 1;
+            const description = document.getElementById('etape_description').value;
+
+            if (!nom || !duree || !coutMO) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+
+            // Trouver et modifier l'étape
+            const etapeIndex = etapesFabrication.findIndex(e => e.id === etapeEnModification);
+            if (etapeIndex !== -1) {
+                etapesFabrication[etapeIndex] = {
+                    id: etapeEnModification,
+                    nom: nom,
+                    duree: duree,
+                    coutMO: coutMO,
+                    coutMachine: coutMachine,
+                    type: type,
+                    ordre: ordre,
+                    description: description,
+                    coutTotal: (duree / 60) * coutMO + coutMachine
+                };
+
+                etapesFabrication.sort((a, b) => a.ordre - b.ordre);
+                afficherEtapes();
+                calculerCouts();
+                autoSave();
+
+                showSaveIndicator('success', '✅ Étape modifiée avec succès');
+            }
+
+            // Sortir du mode modification
+            annulerModificationEtape();
+        }
+
+        function annulerModificationEtape() {
+            etapeEnModification = null;
+
+            // Vider le formulaire
+            document.getElementById('etape_nom').value = '';
+            document.getElementById('etape_duree').value = '';
+            document.getElementById('etape_cout_mo').value = '';
+            document.getElementById('etape_cout_machine').value = '';
+            document.getElementById('etape_type').value = 'preparation';
+            document.getElementById('etape_ordre').value = '';
+            document.getElementById('etape_description').value = '';
+
+            // Remettre l'interface normale
+            document.getElementById('btn_ajouter_etape').textContent = '➕ Ajouter l\'étape';
+            document.getElementById('btn_ajouter_etape').onclick = function() { ajouterEtape(); };
+            document.getElementById('btn_annuler_modif').style.display = 'none';
+
+            showSaveIndicator('success', '❌ Modification annulée');
         }
 
         function updateMatieresSelect() {
